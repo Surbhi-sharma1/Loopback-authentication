@@ -1,5 +1,5 @@
-import {BootMixin} from '@loopback/boot';
-import {ApplicationConfig} from '@loopback/core';
+import { BootMixin } from '@loopback/boot';
+import { ApplicationConfig } from '@loopback/core';
 import {
   RestExplorerBindings,
   RestExplorerComponent,
@@ -7,7 +7,7 @@ import {
 import * as dotenv from 'dotenv';
 import * as dotenvExt from 'dotenv-extended';
 
-import {AuthenticationComponent} from 'loopback4-authentication';
+import { AuthenticationComponent } from 'loopback4-authentication';
 import {
   AuthorizationBindings,
   AuthorizationComponent,
@@ -23,15 +23,17 @@ import {
   SECURITY_SCHEME_SPEC,
 } from '@sourceloop/core';
 
-import {AuthenticationServiceComponent} from '@sourceloop/authentication-service';
+import { AuthenticationServiceComponent, SignUpBindings } from '@sourceloop/authentication-service';
 
-import {RepositoryMixin} from '@loopback/repository';
-import {RestApplication} from '@loopback/rest';
-import {ServiceMixin} from '@loopback/service-proxy';
+import { RepositoryMixin } from '@loopback/repository';
+import { RestApplication } from '@loopback/rest';
+import { ServiceMixin } from '@loopback/service-proxy';
 import path from 'path';
 import * as openapi from './openapi.json';
+import { LocalSignupProvider } from './providers/signup-provider';
+import { TokenHandlerProvider } from './providers/token-handler.provider';
 
-export {ApplicationConfig};
+export { ApplicationConfig };
 
 export class AuthApplication extends BootMixin(
   ServiceMixin(RepositoryMixin(RestApplication)),
@@ -61,7 +63,7 @@ export class AuthApplication extends BootMixin(
     this.component(CoreComponent);
 
     // Set up the custom sequence
-    this.sequence(ServiceSequence);
+    //this.sequence(ServiceSequence);
 
     // Add authentication component
     this.component(AuthenticationComponent);
@@ -92,6 +94,10 @@ export class AuthApplication extends BootMixin(
       allowAlwaysPaths: ['/explorer', '/openapi.json'],
     });
     this.component(AuthorizationComponent);
+    this.bind(SignUpBindings.LOCAL_SIGNUP_PROVIDER).toProvider(
+      LocalSignupProvider,
+    );
+    this.bind(SignUpBindings.SIGNUP_HANDLER_PROVIDER).toProvider(TokenHandlerProvider)
 
     // Set up default home page
     this.static('/', path.join(__dirname, '../public'));
@@ -124,7 +130,7 @@ export class AuthApplication extends BootMixin(
       components: {
         securitySchemes: SECURITY_SCHEME_SPEC,
       },
-      servers: [{url: '/'}],
+      servers: [{ url: '/' }],
     });
   }
 }
